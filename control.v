@@ -69,6 +69,7 @@ module control(OPCODE,regdist,jump,branch,memread,memtoreg,aluop,memwrite,alusrc
 				regwrite    = 1'b1;
 				memread     = 1'b0;
 				memwrite    = 1'b0;
+				//aluop       = 2'b00;
 				/*case (opcode) still needd to know more about aluop
 					ADDI:   ALUOp = ADD;
 					ANDI:   ALUOp = AND;
