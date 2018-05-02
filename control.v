@@ -6,6 +6,8 @@ module control(OPCODE,regdist,jump,branch,memread,memtoreg,aluop,memwrite,alusrc
 	always	@	(OPCODE) begin
 		case	(OPCODE)
 			6'b000000 : begin //RTYPE
+				aluop  = 2'b10; //
+
 				regdist = 1;
 				branch = 0;
 				memread = 0;
@@ -31,6 +33,7 @@ module control(OPCODE,regdist,jump,branch,memread,memtoreg,aluop,memwrite,alusrc
 				memwrite = 0;
 				alusrc = 1;
 				regwrite = 1;
+				aluop  = 2'b00;
 			end
 			6'b101011: begin //SW
 				regdist = 1'bx;
@@ -40,7 +43,29 @@ module control(OPCODE,regdist,jump,branch,memread,memtoreg,aluop,memwrite,alusrc
 				memwrite = 1;
 				alusrc = 1;
 				regwrite = 0;
+				aluop  = 2'b00;
+
 			end
+			
+			6'b000100: begin	// beq
+				aluop  = 2'b01;
+				regdist = 1'bx;
+				branch = 1;//
+				memread = 0;//
+				memtoreg = 1'bx;//
+				memwrite = 0;//
+				alusrc = 0;//
+				regwrite = 0;//
+			end
+			
+			
+		
+
+			
+
+		
+			
+			
 		endcase
 
 	end
