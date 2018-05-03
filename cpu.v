@@ -16,11 +16,14 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   input clk;
   reg [31:0] PC; 
 
+	//PROGRAM COUNTER
 	wire [31:0] newPC;
   wire [31:0] PC_PLUS_4; 
-  wire [31:0] next_PC;
-  wire [31:0] add_PC_addr;
+  wire [31:0] PC_ADDER;
   wire [31:0] currentInstruction;
+	wire branchMUX;
+	//PROGRAM COUNTER
+
   //CONTROL SIGNALS
   wire regDestFLAG;
   wire branchFLAG;
@@ -43,6 +46,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   wire[31:0] ALU_result;
   wire zeroFLAG;
   wire[31:0] aluInputData_2;
+	wire[31:0] immediateValueExtended;
   //ALU
 
   //DATA MEMORY
