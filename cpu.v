@@ -1,11 +1,10 @@
-module CPU(clk, alu_out_test);
-  output wire[31:0] alu_out_test;
-  assign alu_out_test = ALU_result;
+module CPU(clk, outputTEST);
+  output wire[31:0] outputTEST;
+  assign outputTEST = PC;
   input clk;
   reg [31:0] PC; 
-  initial begin
-    PC = 0;
-  end
+
+	wire [31:0] newPC;
   wire [31:0] PC_PLUS_4; 
   wire [31:0] next_PC;
   wire [31:0] add_PC_addr;
@@ -371,17 +370,18 @@ endmodule
 
 module testBench();
   reg clk;
-  wire[31:0] alu_out; 
-
+  wire[31:0] OUTPUT; 
+  CPU cpu(clk,OUTPUT);
+  
   initial	begin
+    cpu.PC = 0;
 		clk	=	0;
 		forever	begin
 			#10	clk	=	~clk;
 		end
 	end
-  CPU cpu(clk,alu_out);
 
   always@(posedge clk) begin
-		$display("%t => ALU OUTPUT %d",	$time,	alu_out);
+		$display("%t => Current PC %d",	$time,	OUTPUT);
 	end
 endmodule
