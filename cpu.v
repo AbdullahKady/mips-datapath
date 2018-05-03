@@ -1,4 +1,6 @@
-module CPU(clk);
+module CPU(clk, alu_out_test);
+  output wire[31:0] alu_out_test;
+  assign alu_out_test = ALU_result;
   input clk;
   reg [31:0] PC; 
   initial begin
@@ -56,7 +58,7 @@ module CPU(clk);
   //Write register file MUX
   assign registerFileWriteData = (memToRegFLAG) ? dataMemoryOut : ALU_result;
 
-  IntstructionMemory instMemory(
+  InstructionMemory instMemory(
     PC,
     currentInstruction
   );
@@ -109,7 +111,7 @@ endmodule
 
 
 
-module IntstructionMemory(
+module InstructionMemory(
 		readAddress,
 		instruction
 	);
@@ -120,14 +122,14 @@ module IntstructionMemory(
 	//INITIAL PROGRAM
 	initial 
 	begin
-		mem[0] = 8'b00100010;
-		mem[1] = 8'b01110010;
-		mem[2] = 8'b11110000;
-		mem[3] = 8'b00000100;
-		mem[4] = 8'b11111010;
-		mem[5] = 8'b10100010;
-		mem[6] = 8'b00111011;
-		mem[7] = 8'b11011010;
+		mem[0] = 8'b00000010;
+		mem[1] = 8'b01010000;
+		mem[2] = 8'b10001000;
+		mem[3] = 8'b00100000;
+		mem[4] = 8'b00000010;
+		mem[5] = 8'b01010000;
+		mem[6] = 8'b10001000;
+		mem[7] = 8'b00100000;
 	end
 	//INITIAL PROGRAM
 	assign instruction = {
@@ -252,7 +254,12 @@ module RegisterFile (readAddress_1, readAddress_2, writeAddress, outputData_1, o
 
   initial
   begin
-		for (k=0; k<32; k=k+1)
+		Regfile[0] = 32'b0;
+		Regfile[1] = 32'b0;  
+		Regfile[2] = 65;
+		Regfile[3] = 100;
+		Regfile[4] = 150;
+		for (k=5; k<32; k=k+1)
 		begin
 			Regfile[k] = 32'b0;
 		end
@@ -362,14 +369,19 @@ module DataMemory(
 	
 endmodule
 
-// module testBench()
-  // reg clk;
-  // initial	begin
-		// clk	=	0;
-		// forever	begin
-			// #10	clk	=	~clk;
-		// end
-	// end
-// 
-  // CPU cpu(clk);
-// endmodule
+module testBench();
+  reg clk;
+  wire[31:0] alu_out; 
+
+  initial	begin
+		clk	=	0;
+		forever	begin
+			#10	clk	=	~clk;
+		end
+	end
+  CPU cpu(clk,alu_out);
+
+  always@(posedge clk) begin
+		$display("%t => ALU OUTPUT %d",	$time,	alu_out);
+	end
+endmodule
