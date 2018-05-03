@@ -1,28 +1,34 @@
-module	ALU	(OUT,	ZeroFlag,	In1,	In2,	ALUOP);
+module	ALU	(OUT,	ZeroFlag,	input1_unsigned,	input2_unsigned,ALU_SELECTION, SHIFT_AMOUNT);
 				
-				input	[31:0]	In1,	In2;
-				input	[2:0]	ALUOP;
-				output	reg	[31:0]	OUT;	
-				output	reg	ZeroFlag;
+	input	[31:0]	input1_unsigned,	input2_unsigned;
+	input	[2:0]	ALU_SELECTION;
+	input [4:0] SHIFT_AMOUNT;
+	output	reg	[31:0]	OUT;
+	output	ZeroFlag;
+	integer input1_signed,input2_signed;
 				
-				always	@	(In1,	In2,	ALUOP)
-				begin
-					if	(In1	==	In2)
-								ZeroFlag	=	1;
-				else
-								ZeroFlag	=	0;
-				end
-				always	@	(In1,	In2,	ALUOP)
-				begin
-					case	(ALUOP)
-						0	:	OUT	=	In1	+	In2;
-						1	:	OUT	=	In1	- In2;
-						2	:	OUT	=	In1	&	In2;
-						3	:	OUT	=	In1	&	In2;
-						4	:	OUT	=	In1	|	In2;
-						5	:	OUT	=	In1	<	In2;
-					endcase
-				end
+
+	// BEQ 
+	assign ZeroFlag = (input1_unsigned == input2_unsigned);
+
+	// ALL OTHER CASES
+	always	@	(*)
+	begin
+		//SIGNED VALUES 
+		input1_signed = input1_unsigned;
+		input2_signed = input2_unsigned;
+
+		case	(ALU_SELECTION)
+			0	:	OUT	=	input1_signed	+	input2_signed; //ADD
+			1	:	OUT	=	input1_signed	- input2_signed; //SUB  
+			2	:	OUT	=	input1_unsigned	<< SHIFT_AMOUNT; //SLL 
+			3	:	OUT	=	input1_unsigned >> SHIFT_AMOUNT; //SRL 
+			4	:	OUT	=	input1_unsigned	&	input2_unsigned; //AND
+			5	:	OUT	=	input1_unsigned	|	input2_unsigned; //OR
+			6 : OUT = input1_signed < input2_signed;  //Compare signed
+			7 : OUT = input1_unsigned < input2_unsigned; //Compare unsigned
+		endcase
+	end
 endmodule
 /*module	ALU_Test();
 				reg	[31:0]	a,	b;

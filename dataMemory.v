@@ -37,10 +37,8 @@ module DataMemory(
 		end
 	end
 	
-	always @(memRead, address)
-    begin
-        if(memRead !== 2'b00)
-		begin
+	always @(memRead, address)begin
+    if(memRead !== 2'b00)begin
 			case(memRead)
 				//Load word
 				1	:	dataOut = {mem[address],mem[address+1],mem[address+2],mem[address+3]};
@@ -56,7 +54,7 @@ module DataMemory(
 				};
 			endcase
 		end
-    end
+  end
 	
 endmodule
 
