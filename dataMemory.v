@@ -10,20 +10,20 @@ module DataMemory(
 	input memWrite,clk;
 	input [1:0] memRead;
 	output reg [31:0] dataOut;
-	reg [7:0] mem [511:0];
+	reg [7:0] mem [1023:0];
 
 	//TESTING ONLY
-	initial 
-	begin 
-		mem[0] = 8'b00100010;
-		mem[1] = 8'b01110010;
-		mem[2] = 8'b11110000;
-		mem[3] = 8'b00000100;
-		mem[4] = 8'b11111010;
-		mem[5] = 8'b00100010;
-		mem[6] = 8'b00111010;
-		mem[7] = 8'b11011010;
-	end
+	// initial 
+	// begin 
+	// 	mem[0] = 8'b00100010;
+	// 	mem[1] = 8'b01110010;
+	// 	mem[2] = 8'b11110000;
+	// 	mem[3] = 8'b00000100;
+	// 	mem[4] = 8'b11111010;
+	// 	mem[5] = 8'b00100010;
+	// 	mem[6] = 8'b00111010;
+	// 	mem[7] = 8'b11011010;
+	// end
 	//TESTING ONLY
 
 	always @ (posedge clk)

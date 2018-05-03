@@ -1,4 +1,4 @@
-module Register_File (readAddress_1, readAddress_2, writeAddress, outputData_1, outputData_2, writeInputData, regWrite, clk);
+module RegisterFile (readAddress_1, readAddress_2, writeAddress, outputData_1, outputData_2, writeInputData, regWrite, clk);
 
 	input [4:0] readAddress_1, readAddress_2, writeAddress;
 	input [31:0] writeInputData;
@@ -14,7 +14,7 @@ module Register_File (readAddress_1, readAddress_2, writeAddress, outputData_1, 
 
   initial
   begin
-		for (k=0; k<32; k=k+1) 
+		for (k=0; k<32; k=k+1)
 		begin
 			Regfile[k] = 32'b0;
 		end
@@ -39,7 +39,7 @@ module	test_Register();
   wire	[31:0]	read_data_1,	read_data_2;
 
 
-  Register_File regFile(
+  RegisterFile regFile(
     read_reg_1,
     read_reg_2,
     write_reg,

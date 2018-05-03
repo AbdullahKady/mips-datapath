@@ -9,8 +9,7 @@ module	MUX	(OUT,In1,In2,op);
 				begin
 				case	(op)
 						0	:	OUT	=	In1;
-						1	:	OUT	=	In2;
-						
+						1	:	OUT	=	In2;		
 					endcase
 			
 				end
