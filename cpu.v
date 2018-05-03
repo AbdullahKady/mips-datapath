@@ -1,6 +1,18 @@
-module CPU(clk, outputTEST);
-  output wire[31:0] outputTEST;
-  assign outputTEST = PC;
+module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_REG_READ2);
+  output wire[31:0] outputTEST_PC;  
+	output wire[31:0] outputTEST_ALU;
+  output wire[31:0] outputTEST_REG_READ1;
+  output wire[31:0] outputTEST_REG_READ2;			
+		
+  assign outputTEST_PC = PC;		
+  assign outputTEST_ALU = ALU_result;
+  assign outputTEST_REG_READ1 = registerFileReadData_1;
+  assign outputTEST_REG_READ2 = registerFileReadData_2;
+
+
+
+
+	///////////////////////////////////////////////////////////////////////////////////////
   input clk;
   reg [31:0] PC; 
 
@@ -121,14 +133,15 @@ module InstructionMemory(
 	//INITIAL PROGRAM
 	initial 
 	begin
-		mem[0] = 8'b00000010;
-		mem[1] = 8'b01010000;
-		mem[2] = 8'b10001000;
+
+		mem[0] = 8'b00000000;
+		mem[1] = 8'b01000011;
+		mem[2] = 8'b00010000;
 		mem[3] = 8'b00100000;
-		mem[4] = 8'b00000010;
-		mem[5] = 8'b01010000;
-		mem[6] = 8'b10001000;
-		mem[7] = 8'b00100000;
+		// mem[4] = 8'b00000010;
+		// mem[5] = 8'b01010000;
+		// mem[6] = 8'b10001000;
+		// mem[7] = 8'b00100000;
 	end
 	//INITIAL PROGRAM
 	assign instruction = {
@@ -257,8 +270,7 @@ module RegisterFile (readAddress_1, readAddress_2, writeAddress, outputData_1, o
 		Regfile[1] = 32'b0;  
 		Regfile[2] = 65;
 		Regfile[3] = 100;
-		Regfile[4] = 150;
-		for (k=5; k<32; k=k+1)
+		for (k=4; k<32; k=k+1)
 		begin
 			Regfile[k] = 32'b0;
 		end
@@ -370,8 +382,11 @@ endmodule
 
 module testBench();
   reg clk;
-  wire[31:0] OUTPUT; 
-  CPU cpu(clk,OUTPUT);
+  wire[31:0] OUTPUT_PC;
+	wire[31:0] OUTPUT_ALU;
+	wire[31:0] OUTPUT_REG1;
+	wire[31:0] OUTPUT_REG2; 
+  CPU cpu(clk,OUTPUT_PC, OUTPUT_ALU,OUTPUT_REG1,OUTPUT_REG2);
   
   initial	begin
     cpu.PC = 0;
@@ -382,6 +397,6 @@ module testBench();
 	end
 
   always@(posedge clk) begin
-		$display("%t => Current PC %d",	$time,	OUTPUT);
+		$display("%t => Current PC %d || Current ALU result %d || Read register1: %d || Read register2: %d",	$time,	OUTPUT_PC, OUTPUT_ALU, OUTPUT_REG1, OUTPUT_REG2);
 	end
 endmodule
