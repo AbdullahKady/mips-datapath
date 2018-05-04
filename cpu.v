@@ -2,8 +2,10 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   output wire[31:0] outputTEST_PC;  
 	output wire[31:0] outputTEST_ALU;
   output wire[31:0] outputTEST_REG_READ1;
-  output wire[31:0] outputTEST_REG_READ2;			
+  output wire[31:0] outputTEST_REG_READ2;		
+  output wire[2:0] outputTEST_SEL;					
 		
+	
   assign outputTEST_PC = PC;		
   assign outputTEST_ALU = ALU_result;
   assign outputTEST_REG_READ1 = registerFileReadData_1;
@@ -155,9 +157,9 @@ module InstructionMemory(
 		
 
 		//BOILERPLATE PROGRAM TO SAVE YOU THE TIME OF WRITING MEMORY ADDRESSES :D
-		// {mem[0],mem[1],mem[2],mem[3]} = 32'b00100010000100000000000111110100; 
-		// {mem[4],mem[5],mem[6],mem[7]} = 32'b10101101001100000000000000000000; 
-		// {mem[8],mem[9],mem[10],mem[11]} = 32'b00100010010100100000000011001000; 
+		{mem[0],mem[1],mem[2],mem[3]} = 32'b00100010000100000001000100010001; //addi s0 s0 x1111 
+		{mem[4],mem[5],mem[6],mem[7]} = 32'b00000000000100001000000010000010; //srl s0,s0,0x2 
+		{mem[8],mem[9],mem[10],mem[11]} = 32'b10101101000100000000000000000000; //sw s0, t0
 		// {mem[12],mem[13],mem[14],mem[15]} = 32'b10001101001101010000000000000000; 
 		// {mem[16],mem[17],mem[18],mem[19]} = 32'b00000010000101011001000000100010; 
 		// {mem[20],mem[21],mem[22],mem[23]} = 32'b00100010001100010000001000000000;
@@ -336,8 +338,8 @@ module	ALU	(OUT,	ZeroFlag,	input1_unsigned,	input2_unsigned,ALU_SELECTION, SHIFT
 		case	(ALU_SELECTION)
 			0	:	OUT	=	input1_signed	+	input2_signed; //ADD
 			1	:	OUT	=	input1_signed	- input2_signed; //SUB  
-			2	:	OUT	=	input1_unsigned	<< SHIFT_AMOUNT; //SLL 
-			3	:	OUT	=	input1_unsigned >> SHIFT_AMOUNT; //SRL 
+			2	:	OUT	=	input2_unsigned	<< SHIFT_AMOUNT; //SLL 
+			3	:	OUT	=	input2_unsigned >> SHIFT_AMOUNT; //SRL 
 			4	:	OUT	=	input1_unsigned	&	input2_unsigned; //AND
 			5	:	OUT	=	input1_unsigned	|	input2_unsigned; //OR
 			6 : OUT = input1_signed < input2_signed;  //Compare signed
