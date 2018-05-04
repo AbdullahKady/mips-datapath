@@ -1,10 +1,10 @@
-module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_REG_READ2);
+module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_REG_READ2, TERMINATED);
   output wire[31:0] outputTEST_PC;  
 	output wire[31:0] outputTEST_ALU;
   output wire[31:0] outputTEST_REG_READ1;
   output wire[31:0] outputTEST_REG_READ2;		
   output wire[2:0] outputTEST_SEL;					
-		
+	output reg TERMINATED;
 	
   assign outputTEST_PC = PC;		
   assign outputTEST_ALU = ALU_result;
@@ -57,6 +57,9 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
 
   always @(posedge clk) begin
     PC <= newPC;
+		//MAYBE LATER ON ADD INSTRUCTION FOR TERMINATION
+		if(PC > 100)
+			TERMINATED <= 1;
   end
   //Sign extended immediate value (the address).
   assign immediateValueExtended = {{16{currentInstruction[15]}}, currentInstruction[15:0]};
@@ -362,7 +365,7 @@ module DataMemory(
 	output reg [31:0] dataOut;
 	reg [7:0] mem [1023:0];
 
-	//INITIALIZE ANY DATA HERE
+	//INITIALIZE ANY DATA HERE. The data segment in assembler
 	// initial 
 	// begin 
 	// 	mem[0] = 8'b00100010;
@@ -413,10 +416,12 @@ module testBench();
 	wire[31:0] OUTPUT_ALU;
 	wire[31:0] OUTPUT_REG1;
 	wire[31:0] OUTPUT_REG2; 
-  CPU cpu(clk,OUTPUT_PC, OUTPUT_ALU,OUTPUT_REG1,OUTPUT_REG2);
-  
+	wire TERMINATED;
+  CPU cpu(clk,OUTPUT_PC, OUTPUT_ALU,OUTPUT_REG1,OUTPUT_REG2, TERMINATED);
+  integer k;
   initial	begin
     cpu.PC = 0;
+    cpu.TERMINATED = 0;		
 		clk	=	0;
 		forever	begin
 			#10	clk	=	~clk;
@@ -424,6 +429,20 @@ module testBench();
 	end
 
   always@(posedge clk) begin
+		if(TERMINATED) begin
+			$display("========================================================= SYSTEM TERMINATED =========================================================");	
+			$display("========================================================= REGISTER FILE DUMP =========================================================");				
+			for (k=0; k<32; k=k+1)
+			begin
+				$display("\t\t\t\t\t\t\t\t\t\t\t\tRegister #%d => %d",k,cpu.regFile.Regfile[k]);	
+			end
+			$display("========================================================= DATA MEMORY DUMP =========================================================");
+			for (k=0; k<200; k=k+1)
+			begin
+				$display("\t\t\t\t\t\t\t\t\t\t\t\tMemory Cell #%d => %d",k,cpu.dataMemory.mem[k]);	
+			end				
+			$finish;
+		end
 		$display("%t => Current PC %d || Current ALU result %d || Read register1: %d || Read register2: %d",	$time,	OUTPUT_PC, OUTPUT_ALU, OUTPUT_REG1, OUTPUT_REG2);
 	end
 endmodule
