@@ -393,7 +393,7 @@ module DataMemory(
 				1	:	dataOut = {mem[address],mem[address+1],mem[address+2],mem[address+3]};
 				//Load half word
 				2	:	dataOut = {
-						{16{mem[address][0]}},
+						{16{mem[address][7]}},
 						{mem[address],mem[address+1]}
 					};
 				//Load half word unsigned
