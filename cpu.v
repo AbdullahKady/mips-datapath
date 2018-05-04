@@ -38,7 +38,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   //CONTROL SIGNALS
   
   //REGISTER FILE
-  wire[4:0] writeRegisterAddress;
+  wire[4:0] IDEXMEM_REGWRITE;
   wire[31:0] registerFileReadData_1;
   wire[31:0] registerFileReadData_2;  
   wire[31:0] registerFileWriteData;  
@@ -62,19 +62,19 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
 			TERMINATED <= 1;
   end
   //Sign extended immediate value (the address).
-  assign immediateValueExtended = {{16{currentInstruction[15]}}, currentInstruction[15:0]};
+  assign immediateValueExtended = {{16{INS_OUT_IFID[15]}}, INS_OUT_IFID[15:0]};
   
   assign PC_PLUS_4 = PC + 4;
-  assign PC_ADDER = PC_PLUS_4 + (immediateValueExtended<<2);
+  assign PC_ADDER = IDEX_IFID_PC_OUT + (IDEX_SIGN_EXTEND_OUT<<2);
 
-  assign branchMUX = branchFLAG & zeroFLAG;
+  assign branchMUX = EXEM_branchFLAG_OUT & EXEM_zeroFLAG_OUT;
 
   //PC select mux 
-  assign newPC = (branchMUX) ? PC_ADDER : PC_PLUS_4;
+  assign newPC = (branchMUX) ? EXEM_PC_ADDR_OUT : PC_PLUS_4;
   //Write register MUX
-  assign writeRegisterAddress = (regDestFLAG) ? currentInstruction[15:11] : currentInstruction[20:16];
+  assign IDEXMEM_REGWRITE = (IDEX_regDestFLAG_OUT) ? IDEX_INS_15_11_OUT : IDEX_INS_20_16_OUT;
   //ALU 2nd input MUX
-  assign aluInputData_2 = (aluSrcFLAG) ? immediateValueExtended : registerFileReadData_2;
+  assign aluInputData_2 = (IDEX_aluSrcFLAG_OUT) ? IDEX_SIGN_EXTEND_OUT : IDEX_REG_READ_2_OUT;
   //Write register file MUX
   assign registerFileWriteData = (memToRegFLAG) ? dataMemoryOut : ALU_result;
 
@@ -84,8 +84,8 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   );
 
   ControlUnit ctrlUnit(
-    currentInstruction[31:26],
-    currentInstruction[5:0],
+    INS_OUT_IFID[31:26],
+    INS_OUT_IFID[5:0],
     regDestFLAG,
     branchFLAG,
     memReadFLAG,
@@ -96,39 +96,259 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
     regWriteFLAG
   );
 
+	//TODO MEMWEB
   RegisterFile regFile(
-    currentInstruction[25:21],
-    currentInstruction[20:16],    
-    writeRegisterAddress,
+    INS_OUT_IFID[25:21],
+    INS_OUT_IFID[20:16],    
+    MEMWEB_writeRegisterAddress,
     registerFileReadData_1,
     registerFileReadData_2,
     registerFileWriteData,
-    regWriteFLAG,
+    MEMWEB_REGWRITE_FLAG,
     clk
   );
 
   ALU alu(
     ALU_result,
     zeroFLAG,
-    registerFileReadData_1,
+    IDEX_REG_READ_1_OUT,
     aluInputData_2,
-    ALU_SELECTION,
-    currentInstruction[10:6]
+    IDEX_ALU_SELECTION_OUT,
+		IDEX_INS_10_6_OUT_SHAMT
   );
 
   DataMemory dataMemory(
-    ALU_result,
-    registerFileReadData_2,
-    memWriteFLAG,
-    memReadFLAG,
+    EXEM_ALU_RESULT_OUT,
+    EXEM_READ_DATA_2_OUT,
+    EXEM_memWriteFLAG_OUT,
+    EXEM_memReadFLAG_OUT,
     dataMemoryOut,
     clk
   );
 
+	wire [31:0] INS_OUT_IFID, PC_OUT_IFID;
+	IFID PIPE_IFID(
+		INS_OUT_IFID,
+		PC_OUT_IFID,
+		currentInstruction,
+		PC_PLUS_4,
+		clk
+	);
+
+	wire IDEX_regDestFLAG_OUT,IDEX_branchFLAG_OUT,IDEX_memToRegFLAG_OUT,IDEX_memWriteFLAG_OUT,IDEX_aluSrcFLAG_OUT,IDEX_regWriteFLAG_OUT;
+	wire [31:0] IDEX_IFID_PC_OUT,IDEX_REG_READ_1_OUT,IDEX_REG_READ_2_OUT,IDEX_SIGN_EXTEND_OUT;
+	wire [4:0] IDEX_INS_20_16_OUT,IDEX_INS_15_11_OUT, IDEX_INS_10_6_OUT_SHAMT;
+	wire [2:0] IDEX_ALU_SELECTION_OUT;
+	wire [1:0] IDEX_memReadFLAG_OUT;
   
+	IDEX PIPE_IDEX(
+		regDestFLAG,
+    branchFLAG,
+    memReadFLAG,
+    memToRegFLAG,
+    ALU_SELECTION,
+    memWriteFLAG,
+    aluSrcFLAG,
+    regWriteFLAG,
+		PC_OUT_IFID
+    registerFileReadData_1,
+    registerFileReadData_2,
+    immediateValueExtended,
+    INS_OUT_IFID[20-16],
+    INS_OUT_IFID[15-11],
+    INS_OUT_IFID[10-6],		
+    
+    IDEX_regDestFLAG_OUT,
+    IDEX_branchFLAG_OUT,
+    IDEX_memReadFLAG_OUT,
+    IDEX_memToRegFLAG_OUT,
+    IDEX_ALU_SELECTION_OUT,
+    IDEX_memWriteFLAG_OUT,
+    IDEX_aluSrcFLAG_OUT,
+    IDEX_regWriteFLAG_OUT,
+    IDEX_IFID_PC_OUT,
+    IDEX_REG_READ_1_OUT,
+    IDEX_REG_READ_2_OUT,
+    IDEX_SIGN_EXTEND_OUT,
+    IDEX_INS_20_16_OUT,
+    IDEX_INS_15_11_OUT,
+    IDEX_INS_10_6_OUT_SHAMT,		
+    clk
+	);
+
+
+	wire EXEM_regWriteFLAG_OUT, EXEM_memToRegFLAG_OUT,EXEM_branchFLAG_OUT,EXEM_memWriteFLAG_OUT, EXEM_zeroFLAG_OUT;
+	wire [1:0] EXEM_memReadFLAG_OUT;
+	wire [31:0] EXEM_PC_ADDR_OUT, EXEM_ALU_RESULT_OUT,EXEM_READ_DATA_2_OUT;
+	EXMEM PIPE_EXMEM(
+		IDEX_regWriteFLAG_OUT,
+  	IDEX_memToRegFLAG_OUT,
+  	IDEX_branchFLAG_OUT,
+  	IDEX_memReadFLAG_OUT,
+  	IDEX_memWriteFLAG_OUT,
+  	PC_ADDER,
+  	zeroFLAG,
+  	ALU_result,
+  	IDEX_REG_READ_2_OUT,
+  	IDEXMEM_REGWRITE,
+
+  	EXEM_regWriteFLAG_OUT,
+  	EXEM_memToRegFLAG_OUT,
+  	EXEM_branchFLAG_OUT,
+  	EXEM_memReadFLAG_OUT,
+  	EXEM_memWriteFLAG_OUT,
+  	EXEM_PC_ADDR_OUT,
+  	EXEM_zeroFLAG_OUT,
+  	EXEM_ALU_RESULT_OUT,
+  	EXEM_READ_DATA_2_OUT,
+  	EXEM_writeREGaddress_OUT,
+  	clk
+	);
+
 endmodule
 
 
+module EXMEM (
+  regWriteFLAG_IN,
+  memToRegFLAG_IN,
+  branchFLAG_IN,
+  memReadFLAG_IN,
+  memWriteFLAG_IN,
+  PC_ADDR_IN,
+  zeroFLAG_IN,
+  ALU_RESULT_IN,
+  READ_DATA_2_IN,
+  writeREGaddress_IN,
+
+  regWriteFLAG_OUT,
+  memToRegFLAG_OUT,
+  branchFLAG_OUT,
+  memReadFLAG_OUT,
+  memWriteFLAG_OUT,
+  PC_ADDR_OUT,
+  zeroFLAG_OUT,
+  ALU_RESULT_OUT,
+  READ_DATA_2_OUT,
+  writeREGaddress_OUT,
+  clk
+);
+
+  input [31:0] PC_ADDR_IN,ALU_RESULT_IN,READ_DATA_2_IN;
+  input regWriteFLAG_IN,memToRegFLAG_IN,branchFLAG_IN,memWriteFLAG_IN,zeroFLAG_IN;
+  input [1:0] memReadFLAG_IN;
+  input [4:0] writeREGaddress_IN;
+  input clk;
+
+  output [31:0] PC_ADDR_OUT,ALU_RESULT_OUT,READ_DATA_2_OUT;
+  output regWriteFLAG_OUT,memToRegFLAG_OUT,branchFLAG_OUT,memWriteFLAG_OUT,zeroFLAG_OUT;
+  output [1:0] memReadFLAG_OUT;
+  output [4:0] writeREGaddress_OUT;
+
+
+  always @(posedge clk) begin
+    regWriteFLAG_OUT <= regWriteFLAG_IN;
+    memToRegFLAG_OUT <= memToRegFLAG_IN;
+    branchFLAG_OUT <= branchFLAG_IN;
+    memReadFLAG_OUT <= memReadFLAG_IN;
+    memWriteFLAG_OUT <= memWriteFLAG_IN;
+    PC_ADDR_OUT <= PC_ADDR_IN;
+    zeroFLAG_OUT <= zeroFLAG_IN;
+    ALU_RESULT_OUT <= ALU_RESULT_IN;
+    READ_DATA_2_OUT <= READ_DATA_2_IN;
+    writeREGaddress_OUT <= writeREGaddress_IN;
+  end
+endmodule
+
+
+module IDEX(
+    regDestFLAG_IN,
+    branchFLAG_IN,
+    memReadFLAG_IN,
+    memToRegFLAG_IN,
+    ALU_SELECTION_IN,
+    memWriteFLAG_IN,
+    aluSrcFLAG_IN,
+    regWriteFLAG_IN,
+    IFID_PC_IN,
+    REG_READ_1_IN,
+    REG_READ_2_IN,
+    SIGN_EXTEND_IN,
+    INS_20_16_IN,
+    INS_15_11_IN,
+    INS_10_6_IN,
+		
+    regDestFLAG_OUT,
+    branchFLAG_OUT,
+    memReadFLAG_OUT,
+    memToRegFLAG_OUT,
+    ALU_SELECTION_OUT,
+    memWriteFLAG_OUT,
+    aluSrcFLAG_OUT,
+    regWriteFLAG_OUT,
+    IFID_PC_OUT,
+    REG_READ_1_OUT,
+    REG_READ_2_OUT,
+    SIGN_EXTEND_OUT,
+    INS_20_16_OUT,
+    INS_15_11_OUT,
+    INS_10_6_OUT,		
+    clk
+);
+
+	output reg regDestFLAG_OUT,branchFLAG_OUT,memToRegFLAG_OUT,memWriteFLAG_OUT,aluSrcFLAG_OUT,regWriteFLAG_OUT;
+	output reg [31:0] IFID_PC_OUT,REG_READ_1_OUT,REG_READ_2_OUT,SIGN_EXTEND_OUT;
+	output reg [4:0] INS_20_16_OUT,INS_15_11_OUT, INS_10_6_OUT;
+	output reg [2:0] ALU_SELECTION_OUT;
+	output reg [1:0] memReadFLAG_OUT;
+
+	input regDestFLAG_IN,branchFLAG_IN,memToRegFLAG_IN,memWriteFLAG_IN,aluSrcFLAG_IN,regWriteFLAG_IN;
+	input [31:0] IFID_PC_IN,REG_READ_1_IN,REG_READ_2_IN,SIGN_EXTEND_IN;
+	input [4:0] INS_20_16_IN,INS_15_11_IN, INS_10_6_IN;
+	input [2:0] ALU_SELECTION_IN;
+	input [1:0] memReadFLAG_IN;
+	input clk;
+
+
+
+always @(posedge clk) begin
+  
+   regDestFLAG_OUT <= regDestFLAG_IN ;
+   branchFLAG_OUT <= branchFLAG_IN ;
+   memReadFLAG_OUT <= memReadFLAG_IN ;
+   memToRegFLAG_OUT <= memToRegFLAG_IN ;
+   ALU_SELECTION_OUT <= ALU_SELECTION_IN ;
+   memWriteFLAG_OUT <= memWriteFLAG_IN ;
+   aluSrcFLAG_OUT <= aluSrcFLAG_IN ;
+   regWriteFLAG_OUT <= regWriteFLAG_IN ;
+   IFID_PC_OUT <= IFID_PC_IN ;
+   REG_READ_1_OUT <= REG_READ_1_IN ;
+   REG_READ_2_OUT <= REG_READ_2_IN ;
+   SIGN_EXTEND_OUT <= SIGN_EXTEND_IN ;
+   INS_20_16_OUT <= INS_20_16_IN ;
+   INS_15_11_OUT <= INS_15_11_IN ;
+   INS_10_6_OUT <= INS_10_6_IN ; 
+ 
+end
+
+endmodule
+
+
+module IFID (
+  Instruction_OUT,
+  PC_OUT,
+  Instruction_IN,
+  PC_IN,
+  clk
+);
+
+  output reg [31:0] Instruction_OUT,PC_OUT;
+  input [31:0] Instruction_IN,PC_IN;
+  input clk;
+  always @(posedge clk) begin
+    Instruction_OUT <= Instruction_IN;
+    PC_OUT <= PC_IN;
+  end
+endmodule
 
 
 module InstructionMemory(
