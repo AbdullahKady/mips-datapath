@@ -55,6 +55,21 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   wire[31:0] dataMemoryOut;
   //DATA MEMORY
 
+
+	wire [31:0] INS_OUT_IFID, PC_OUT_IFID;
+	wire IDEX_regDestFLAG_OUT,IDEX_branchFLAG_OUT,IDEX_memToRegFLAG_OUT,IDEX_memWriteFLAG_OUT,IDEX_aluSrcFLAG_OUT,IDEX_regWriteFLAG_OUT;
+	wire [31:0] IDEX_IFID_PC_OUT,IDEX_REG_READ_1_OUT,IDEX_REG_READ_2_OUT,IDEX_SIGN_EXTEND_OUT;
+	wire [4:0] IDEX_INS_20_16_OUT,IDEX_INS_15_11_OUT, IDEX_INS_10_6_OUT_SHAMT;
+	wire [2:0] IDEX_ALU_SELECTION_OUT;
+	wire [1:0] IDEX_memReadFLAG_OUT;
+	wire EXEM_regWriteFLAG_OUT, EXEM_memToRegFLAG_OUT,EXEM_branchFLAG_OUT,EXEM_memWriteFLAG_OUT, EXEM_zeroFLAG_OUT;
+	wire [1:0] EXEM_memReadFLAG_OUT;
+	wire [31:0] EXEM_PC_ADDR_OUT, EXEM_ALU_RESULT_OUT,EXEM_READ_DATA_2_OUT;
+	wire MEMWB_REGWRITE_FLAG,MEMWB_memToRegFLAG_OUT;
+	wire [31:0] MEMWB_dataMemoryOut,MEMWB_ALU_RESULT_OUT;
+	wire [4:0] MEMWB_writeREGaddress_OUT;
+	////////////////
+
   always @(posedge clk) begin
     PC <= newPC;
 		//MAYBE LATER ON ADD INSTRUCTION FOR TERMINATION
@@ -126,7 +141,6 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
     clk
   );
 
-	wire [31:0] INS_OUT_IFID, PC_OUT_IFID;
 	IFID PIPE_IFID(
 		INS_OUT_IFID,
 		PC_OUT_IFID,
@@ -135,11 +149,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
 		clk
 	);
 
-	wire IDEX_regDestFLAG_OUT,IDEX_branchFLAG_OUT,IDEX_memToRegFLAG_OUT,IDEX_memWriteFLAG_OUT,IDEX_aluSrcFLAG_OUT,IDEX_regWriteFLAG_OUT;
-	wire [31:0] IDEX_IFID_PC_OUT,IDEX_REG_READ_1_OUT,IDEX_REG_READ_2_OUT,IDEX_SIGN_EXTEND_OUT;
-	wire [4:0] IDEX_INS_20_16_OUT,IDEX_INS_15_11_OUT, IDEX_INS_10_6_OUT_SHAMT;
-	wire [2:0] IDEX_ALU_SELECTION_OUT;
-	wire [1:0] IDEX_memReadFLAG_OUT;
+
   
 	IDEX PIPE_IDEX(
 		regDestFLAG,
@@ -177,9 +187,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
 	);
 
 
-	wire EXEM_regWriteFLAG_OUT, EXEM_memToRegFLAG_OUT,EXEM_branchFLAG_OUT,EXEM_memWriteFLAG_OUT, EXEM_zeroFLAG_OUT;
-	wire [1:0] EXEM_memReadFLAG_OUT;
-	wire [31:0] EXEM_PC_ADDR_OUT, EXEM_ALU_RESULT_OUT,EXEM_READ_DATA_2_OUT;
+
 	EXMEM PIPE_EXMEM(
 		IDEX_regWriteFLAG_OUT,
   	IDEX_memToRegFLAG_OUT,
@@ -205,9 +213,6 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   	clk
 	);
 
-	wire MEMWB_REGWRITE_FLAG,MEMWB_memToRegFLAG_OUT;
-	wire [31:0] MEMWB_dataMemoryOut,MEMWB_ALU_RESULT_OUT;
-	wire [4:0] MEMWB_writeREGaddress_OUT;
 	MEMWB PIPE_MEMWB(
 		EXEM_regWriteFLAG_OUT,
   	EXEM_memToRegFLAG_OUT,
@@ -295,10 +300,10 @@ module EXMEM (
   input [4:0] writeREGaddress_IN;
   input clk;
 
-  output [31:0] PC_ADDR_OUT,ALU_RESULT_OUT,READ_DATA_2_OUT;
-  output regWriteFLAG_OUT,memToRegFLAG_OUT,branchFLAG_OUT,memWriteFLAG_OUT,zeroFLAG_OUT;
-  output [1:0] memReadFLAG_OUT;
-  output [4:0] writeREGaddress_OUT;
+  output reg [31:0] PC_ADDR_OUT,ALU_RESULT_OUT,READ_DATA_2_OUT;
+  output reg regWriteFLAG_OUT,memToRegFLAG_OUT,branchFLAG_OUT,memWriteFLAG_OUT,zeroFLAG_OUT;
+  output reg [1:0] memReadFLAG_OUT;
+  output reg [4:0] writeREGaddress_OUT;
 
 
   always @(posedge clk) begin
