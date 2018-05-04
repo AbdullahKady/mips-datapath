@@ -76,7 +76,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   //ALU 2nd input MUX
   assign aluInputData_2 = (IDEX_aluSrcFLAG_OUT) ? IDEX_SIGN_EXTEND_OUT : IDEX_REG_READ_2_OUT;
   //Write register file MUX
-  assign registerFileWriteData = (memToRegFLAG) ? dataMemoryOut : ALU_result;
+  assign registerFileWriteData = (MEMWB_memToRegFLAG_OUT) ? MEMWB_dataMemoryOut : MEMWB_ALU_RESULT_OUT;
 
   InstructionMemory instMemory(
     PC,
@@ -96,15 +96,15 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
     regWriteFLAG
   );
 
-	//TODO MEMWEB
+	//TODO MEMWB
   RegisterFile regFile(
     INS_OUT_IFID[25:21],
     INS_OUT_IFID[20:16],    
-    MEMWEB_writeRegisterAddress,
+    MEMWB_writeREGaddress_OUT,
     registerFileReadData_1,
     registerFileReadData_2,
     registerFileWriteData,
-    MEMWEB_REGWRITE_FLAG,
+    MEMWB_REGWRITE_FLAG,
     clk
   );
 
@@ -150,7 +150,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
     memWriteFLAG,
     aluSrcFLAG,
     regWriteFLAG,
-		PC_OUT_IFID
+		PC_OUT_IFID,
     registerFileReadData_1,
     registerFileReadData_2,
     immediateValueExtended,
@@ -205,8 +205,64 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   	clk
 	);
 
+	wire MEMWB_REGWRITE_FLAG,MEMWB_memToRegFLAG_OUT;
+	wire [31:0] MEMWB_dataMemoryOut,MEMWB_ALU_RESULT_OUT;
+	wire [4:0] MEMWB_writeREGaddress_OUT;
+	MEMWB PIPE_MEMWB(
+		EXEM_regWriteFLAG_OUT,
+  	EXEM_memToRegFLAG_OUT,
+  	dataMemoryOut,
+  	EXEM_ALU_RESULT_OUT,
+  	EXEM_writeREGaddress_OUT,
+	
+  	MEMWB_REGWRITE_FLAG,
+  	MEMWB_memToRegFLAG_OUT,
+  	MEMWB_dataMemoryOut,
+  	MEMWB_ALU_RESULT_OUT,
+  	MEMWB_writeREGaddress_OUT,
+  	clk
+	);
+
+
 endmodule
 
+
+////////////////////////////////////////////////////////////////////////
+
+module MEMWB(
+  regWriteFLAG_IN,
+  memToRegFLAG_IN,
+  dataMemoryOut_IN,
+  ALU_RESULT_IN,
+  writeREGaddress_IN,
+
+  regWriteFLAG_OUT,
+  memToRegFLAG_OUT,
+  dataMemoryOut_OUT,
+  ALU_RESULT_OUT,
+  writeREGaddress_OUT,
+  clk
+);
+
+  input regWriteFLAG_IN,memToRegFLAG_IN;
+  input [31:0]dataMemoryOut_IN,ALU_RESULT_IN;
+  input [4:0] writeREGaddress_IN;
+
+  output reg  regWriteFLAG_OUT,memToRegFLAG_OUT;
+  output reg [31:0]dataMemoryOut_OUT,ALU_RESULT_OUT;
+  output reg [4:0] writeREGaddress_OUT;
+
+  input clk;
+
+
+  always @(posedge clk) begin
+    regWriteFLAG_OUT <= regWriteFLAG_IN;
+    memToRegFLAG_OUT <= memToRegFLAG_IN;
+    dataMemoryOut_OUT <= dataMemoryOut_IN;
+    ALU_RESULT_OUT <= ALU_RESULT_IN;
+    writeREGaddress_OUT <= writeREGaddress_IN;
+  end
+endmodule
 
 module EXMEM (
   regWriteFLAG_IN,

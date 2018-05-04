@@ -70,4 +70,34 @@ endmodule
 module MEMWB(
   regWriteFLAG_IN,
   memToRegFLAG_IN,
+  dataMemoryOut_IN,
+  ALU_RESULT_IN,
+  writeREGaddress_IN,
+
+  regWriteFLAG_OUT,
+  memToRegFLAG_OUT,
+  dataMemoryOut_OUT,
+  ALU_RESULT_OUT,
+  writeREGaddress_OUT,
+  clk
 );
+
+  input regWriteFLAG_IN,memToRegFLAG_IN;
+  input [31:0]dataMemoryOut_IN,ALU_RESULT_IN;
+  input [4:0] writeREGaddress_IN;
+
+  output reg  regWriteFLAG_OUT,memToRegFLAG_OUT;
+  output reg [31:0]dataMemoryOut_OUT,ALU_RESULT_OUT;
+  output reg [4:0] writeREGaddress_OUT;
+
+  input clk;
+
+
+  always @(posedge clk) begin
+    regWriteFLAG_OUT <= regWriteFLAG_IN;
+    memToRegFLAG_OUT <= memToRegFLAG_IN;
+    dataMemoryOut_OUT <= dataMemoryOut_IN;
+    ALU_RESULT_OUT <= ALU_RESULT_IN;
+    writeREGaddress_OUT <= writeREGaddress_IN;
+  end
+endmodule
