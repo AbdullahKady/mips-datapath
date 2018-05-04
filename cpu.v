@@ -55,7 +55,8 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   wire[31:0] dataMemoryOut;
   //DATA MEMORY
 
-
+	/////////////
+	
 	wire [31:0] INS_OUT_IFID, PC_OUT_IFID;
 	wire IDEX_regDestFLAG_OUT,IDEX_branchFLAG_OUT,IDEX_memToRegFLAG_OUT,IDEX_memWriteFLAG_OUT,IDEX_aluSrcFLAG_OUT,IDEX_regWriteFLAG_OUT;
 	wire [31:0] IDEX_IFID_PC_OUT,IDEX_REG_READ_1_OUT,IDEX_REG_READ_2_OUT,IDEX_SIGN_EXTEND_OUT;
@@ -187,7 +188,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
 	);
 
 
-
+	wire [4:0] EXEM_writeREGaddress_OUT;
 	EXMEM PIPE_EXMEM(
 		IDEX_regWriteFLAG_OUT,
   	IDEX_memToRegFLAG_OUT,
@@ -401,7 +402,10 @@ module IFID (
   PC_IN,
   clk
 );
-
+	initial begin
+		Instruction_OUT <= 32'b00000000000000000000000000000000;
+  	PC_OUT <= 32'b00000000000000000000000000000000;
+	end
   output reg [31:0] Instruction_OUT,PC_OUT;
   input [31:0] Instruction_IN,PC_IN;
   input clk;
