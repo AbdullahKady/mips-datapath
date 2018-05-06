@@ -169,9 +169,9 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
     registerFileReadData_1,
     registerFileReadData_2,
     immediateValueExtended,
-    INS_OUT_IFID[20-16],
-    INS_OUT_IFID[15-11],
-    INS_OUT_IFID[10-6],		
+    INS_OUT_IFID[20:16],
+    INS_OUT_IFID[15:11],
+    INS_OUT_IFID[10:6],		
     
     IDEX_regDestFLAG_OUT,
     IDEX_branchFLAG_OUT,
