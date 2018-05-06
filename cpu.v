@@ -19,7 +19,7 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   reg [31:0] PC; 
 
 	//PROGRAM COUNTER
-	wire [31:0] newPC;
+	reg [31:0] newPC;
   wire [31:0] PC_PLUS_4; 
   wire [31:0] PC_ADDER;
   wire [31:0] currentInstruction;
@@ -86,7 +86,11 @@ module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_
   assign branchMUX = EXEM_branchFLAG_OUT & EXEM_zeroFLAG_OUT;
 
   //PC select mux 
-  assign newPC = (branchMUX) ? EXEM_PC_ADDR_OUT : PC_PLUS_4;
+  always @(*) begin
+		newPC <= PC_PLUS_4;
+		if(branchMUX)
+			newPC <= EXEM_PC_ADDR_OUT;
+	end
   //Write register MUX
   assign IDEXMEM_REGWRITE = (IDEX_regDestFLAG_OUT) ? IDEX_INS_15_11_OUT : IDEX_INS_20_16_OUT;
   //ALU 2nd input MUX
