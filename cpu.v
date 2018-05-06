@@ -447,11 +447,22 @@ module InstructionMemory(
 		// {mem[20],mem[21],mem[22],mem[23]} = 32'b00000010101100001010100000100010; //sub s5,s5,s0
 		//PROGRAM UTILIZING IMMEDIATE VALUES, DATA MEMORY, AND TYPICAL ADD/SUB
 		
+		// NOP PROGRAM FOR PIPELINING
+			{mem[0],mem[1],mem[2],mem[3]} = 32'b00100010000100000000000100000000; //addi s0 s0 0x100 
+			{mem[4],mem[5],mem[6],mem[7]} = 32'b00100010001100010000000001100100; //addi s1 s1 0x64
+			{mem[8],mem[9],mem[10],mem[11]} =   32'b0; //NOP
+			{mem[12],mem[13],mem[14],mem[15]} = 32'b0; //NOP 
+			{mem[16],mem[17],mem[18],mem[19]} = 32'b0; //NOP 
+			{mem[20],mem[21],mem[22],mem[23]} = 32'b0; //NOP
+			{mem[24],mem[25],mem[26],mem[27]} = 32'b0; //NOP
+			{mem[28],mem[29],mem[30],mem[31]} = 32'b0; //NOP
+			{mem[32],mem[33],mem[34],mem[35]} = 32'b00000010001100001000000000100000; //add s0,s0,s1
+		// NOP PROGRAM FOR PIPELINING
 
 		//BOILERPLATE PROGRAM TO SAVE YOU THE TIME OF WRITING MEMORY ADDRESSES :D
-		{mem[0],mem[1],mem[2],mem[3]} = 32'b00100010000100000001000100010001; //addi s0 s0 x1111 
-		{mem[4],mem[5],mem[6],mem[7]} = 32'b00000000000100001000000010000010; //srl s0,s0,0x2 
-		{mem[8],mem[9],mem[10],mem[11]} = 32'b10101101000100000000000000000000; //sw s0, t0
+		// {mem[0],mem[1],mem[2],mem[3]} = 32'b00100010000100000001000100010001; 
+		// {mem[4],mem[5],mem[6],mem[7]} = 32'b00000000000100001000000010000010; 
+		// {mem[8],mem[9],mem[10],mem[11]} = 32'b10101101000100000000000000000000;
 		// {mem[12],mem[13],mem[14],mem[15]} = 32'b10001101001101010000000000000000; 
 		// {mem[16],mem[17],mem[18],mem[19]} = 32'b00000010000101011001000000100010; 
 		// {mem[20],mem[21],mem[22],mem[23]} = 32'b00100010001100010000001000000000;
