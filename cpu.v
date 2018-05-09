@@ -1,3 +1,4 @@
+
 module CPU(clk, outputTEST_PC, outputTEST_ALU, outputTEST_REG_READ1, outputTEST_REG_READ2, TERMINATED);
   output wire[31:0] outputTEST_PC;  
 	output wire[31:0] outputTEST_ALU;
@@ -424,6 +425,8 @@ module InstructionMemory(
 		readAddress,
 		instruction
 	);
+
+	localparam NOP = 32'b00100001000010000000000000000000;	
 	input [31:0] readAddress;
 	output [31:0] instruction;
 	reg [7:0] mem [511:0];
@@ -450,12 +453,12 @@ module InstructionMemory(
 		// NOP PROGRAM FOR PIPELINING
 			{mem[0],mem[1],mem[2],mem[3]} = 32'b00100010000100000000000100000000; //addi s0 s0 0x100 
 			{mem[4],mem[5],mem[6],mem[7]} = 32'b00100010001100010000000001100100; //addi s1 s1 0x64
-			{mem[8],mem[9],mem[10],mem[11]} =   32'b0; //NOP
-			{mem[12],mem[13],mem[14],mem[15]} = 32'b0; //NOP 
-			{mem[16],mem[17],mem[18],mem[19]} = 32'b0; //NOP 
-			{mem[20],mem[21],mem[22],mem[23]} = 32'b0; //NOP
-			{mem[24],mem[25],mem[26],mem[27]} = 32'b0; //NOP
-			{mem[28],mem[29],mem[30],mem[31]} = 32'b0; //NOP
+			{mem[8],mem[9],mem[10],mem[11]} =   NOP; //NOP
+			{mem[12],mem[13],mem[14],mem[15]} = NOP; //NOP 
+			{mem[16],mem[17],mem[18],mem[19]} = NOP; //NOP 
+			{mem[20],mem[21],mem[22],mem[23]} = NOP; //NOP
+			{mem[24],mem[25],mem[26],mem[27]} = NOP; //NOP
+			{mem[28],mem[29],mem[30],mem[31]} = NOP; //NOP
 			{mem[32],mem[33],mem[34],mem[35]} = 32'b00000010001100001000000000100000; //add s0,s0,s1
 		// NOP PROGRAM FOR PIPELINING
 
